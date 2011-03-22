@@ -1,0 +1,4 @@
+Public version of the DNSSEC key rollover monitor and checker.
+
+The tool will be described in a paper released at the SATIN conference 
+<http://conferences.npl.co.uk/satin/>.
