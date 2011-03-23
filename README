@@ -2,3 +2,36 @@ Public version of the DNSSEC key rollover monitor and checker.
 
 The tool will be described in a paper released at the SATIN conference 
 <http://conferences.npl.co.uk/satin/>.
+
+
+Basic instructions:
+
+sqlite3 dnssec.sqlite < create.sql
+
+while true:
+   key-store-and-report.py $YOURDOMAIN $YOURSERVER
+   sleep $SOMETIME
+
+
+If you want to monitor several domains, an example script is:
+
+#!/bin/sh
+
+# Remember to add a dot at the end, specially for TLD which match a
+# type or class name (Mexico, Madagascar...)
+for domain in example.com example.net example.org ; do
+    sleep $((RANDOM/320))
+    # Select a name server at random
+    set $(dig +cd +short NS $domain)
+    shift $(($RANDOM % $#))
+    server=$1
+    # Select an IP address at random
+    set $(dig +cd +short AAAA $server ; dig +cd +short A $server)
+    shift $(($RANDOM % $#))
+    address=$1
+    if [ "$address" = "" ]; then
+	echo "Cannot find an address for $server"
+	exit 1
+    fi
+    ./key-store-and-report.py $domain $address
+done
