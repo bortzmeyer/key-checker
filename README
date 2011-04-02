@@ -1,17 +1,23 @@
 Public version of the DNSSEC key rollover monitor and checker.
 
-The tool will be described in a paper released at the SATIN conference 
-<http://conferences.npl.co.uk/satin/>.
+The tool has been described in a paper released at the SATIN conference 
+<http://conferences.npl.co.uk/satin/>. See the paper at 
+<http://conferences.npl.co.uk/satin/papers/satin2011-Bortzmeyer.pdf>.
 
 
 Basic instructions:
 
-sqlite3 dnssec.sqlite < create.sql
+1) sqlite3 dnssec.sqlite < create.sql
 
-while true:
+2) Edit ~/.key-report.ini may be using key-report.ini.sample as a
+starting point.
+
+3) while true:
    key-store-and-report.py $YOURDOMAIN $YOURSERVER
    sleep $SOMETIME
 
+Or you can put 'key-store-and-report.py $YOURDOMAIN $YOURSERVER' into
+the crontab.
 
 If you want to monitor several domains, an example script is:
 
@@ -35,3 +41,8 @@ for domain in example.com example.net example.org ; do
     fi
     ./key-store-and-report.py $domain $address
 done
+
+which can also, obviously, put in a crontab.
+
+--
+Comments and requests can be sent to Stéphane Bortzmeyer <bortzmeyer@nic.fr>
