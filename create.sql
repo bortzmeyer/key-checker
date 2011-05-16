@@ -17,7 +17,8 @@ CREATE TABLE Keys (first_seen INT, last_seen INT, name TEXT, key_tag INT, flags 
 -- Each DNSKEY RRset is made of several lines of table Keysets, one
 -- for each member key. All the lines of a given DNSKEY RRset has the
 -- same "id".
-CREATE TABLE Keysets (id TEXT UNIQUE NOT NULL, first_seen INT, last_seen INT, name TEXT, ttl INT);
+-- Remember that two zones may have the same keyset so we cannot make id UNIQUE
+CREATE TABLE Keysets (id TEXT NOT NULL, first_seen INT, last_seen INT, name TEXT, ttl INT, PRIMARY KEY (id, name));
 -- "id" is the SHA-1 hash (base64-encoded) of all the keys of the set.
 CREATE TABLE Keysets_members (id TEXT, member TEXT);
 -- "member" refers to a "key" in table Keys

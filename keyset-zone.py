@@ -17,7 +17,7 @@ database = sqlite3.connect(database_name)
 ecursor = database.cursor()
 icursor = database.cursor()
 i = 0
-ecursor.execute("SELECT id, first_seen, last_seen FROM Keysets;")
+ecursor.execute("SELECT id, first_seen, last_seen FROM Keysets WHERE name=?;", (zone,))
 for keyset_tuple in ecursor.fetchall():
     keyset_id = keyset_tuple[0]
     first = keyset_tuple[1] # SQLite stores them in UTC, remember

@@ -26,7 +26,7 @@ maintainer_address = "foo@bar"
 output = True
 syslog = False
 SECTION = "default"
-version = sys.argv[0] + " $Revision: 10620 $ (Python %s)" % \
+version = sys.argv[0] + " $Revision: 10774 $ (Python %s)" % \
           re.sub ("\n", " ", sys.version)
 # A sample configuration file:
 # [default]
@@ -212,17 +212,21 @@ dnskey_id = base64.b64encode(hasher.digest())
 cursor.execute("SELECT id, first_seen, last_seen FROM Keysets WHERE id=? AND name=?;",
                (dnskey_id, zone))
 tuple = cursor.fetchone()
-if tuple is None: 
+if tuple is None:
     cursor.execute("INSERT INTO Keysets (id, first_seen, last_seen, name, ttl) VALUES (?, datetime('now'), datetime('now'), ?, ?);", (dnskey_id, zone, dnskey_ttl))
-    for key in keys:
-        cursor.execute("INSERT INTO Keysets_Members (id, member) VALUES (?, ?);", (dnskey_id, base64.b64encode(key.key)))
+    # The keyset may already exist, for another zone
+    cursor.execute("SELECT id, first_seen, last_seen FROM Keysets WHERE id=?", (dnskey_id,))
+    tuple = cursor.fetchone()
+    if tuple is None:
+        for key in keys:
+            cursor.execute("INSERT INTO Keysets_Members (id, member) VALUES (?, ?);", (dnskey_id, base64.b64encode(key.key)))
     infos = """
     The keyset %s appeared for the first time in the zone "%s".
 
     Its TTL is %i and its members are: %s
         """ % (dnskey_id, zone, dnskey_ttl, key_tags)
     sendemail("New keyset in zone %s" % zone, infos)
-else: # This is an already-seen keyset
+else: # This is an already-seen keyset for this zone
     cursor.execute("UPDATE Keysets SET last_seen=datetime('now'), ttl=? WHERE id=? AND name=?;", (dnskey_ttl, dnskey_id, zone))
 
 get_rr(zone, 'SOA',  address, update_zones)
