@@ -25,6 +25,7 @@ email_prefix = "DNSSEC check"
 maintainer_address = "foo@bar"
 output = True
 syslog = False
+file_only = False
 SECTION = "default"
 version = sys.argv[0] + " $Revision: 10774 $ (Python %s)" % \
           re.sub ("\n", " ", sys.version)
@@ -35,6 +36,7 @@ version = sys.argv[0] + " $Revision: 10774 $ (Python %s)" % \
 # prefix: DNSSEC Check at AFNIC
 # maintainer: Stephane.Bortzmeyer+dnssec-key-check@nic.fr
 # timeout: 10
+# fileonly: xxxx.out   # append output to file; no mail is sent
 
 class DNSerror(Exception):
     pass
@@ -49,10 +51,23 @@ def sendemail(subject, content):
            (maintainer_address, maintainer_address, ("[%s] " % email_prefix) + subject,
             version))
     msg = msg + content + "\r\n"
-    server = smtplib.SMTP(mail_server)
-    server.set_debuglevel(0)
-    server.sendmail(maintainer_address, maintainer_address, msg)
-    server.quit()
+
+    if file_only:
+        timestr = time.strftime("%Y-%m-%d %H:%M:%S %z")
+        msg = ("%s -- %s\n" % (timestr, subject))
+        msg = msg + content + "\n"
+        try:
+            f = open(file_only, 'a')
+            f.write(msg)
+            f.close()
+        except Exception, e:
+            print "Cannot open output file {0}: {1}".format(file_only, str(e))
+            sys.exit(2)
+    else:
+        server = smtplib.SMTP(mail_server)
+        server.set_debuglevel(0)
+        server.sendmail(maintainer_address, maintainer_address, msg)
+        server.quit()
 
 def get_rr(zone, rrtype, ns_address, handler=None):
     """ rrtype must be a character _string_. handler is a function
@@ -135,8 +150,12 @@ def update_zones(set):
 if len(sys.argv) != 3:
     raise Exception("Usage: dnssec.py zonename nameserver-address")
 
-config = ConfigParser.SafeConfigParser()
-config.readfp(open(os.path.expanduser("~/.key-report.ini")))
+try:
+    config = ConfigParser.SafeConfigParser()
+    config.readfp(open(os.path.expanduser("~/.key-report.ini")))
+except:
+    print "Cannot open config file {0}".format(os.path.expanduser("~/.key-report.ini"))
+    sys.exit(2)
 
 if config.has_option(SECTION, 'mailserver'):
     mail_server = config.get(SECTION, 'mailserver')
@@ -152,6 +171,8 @@ if config.has_option(SECTION, 'output'):
     output = config.getboolean(SECTION, 'output')
 if config.has_option(SECTION, 'syslog'):
     syslog = config.getboolean(SECTION, 'syslog')
+if config.has_option(SECTION, 'fileonly'):
+    file_only = config.get(SECTION, 'fileonly')
 
 generator = random.Random()
 formatter_long = logging.Formatter('%(name)s: %(asctime)s %(levelname)s %(message)s', '%Y-%m-%d %H:%M:%S')

@@ -1,7 +1,7 @@
 Public version of the DNSSEC key rollover monitor and checker.
 
-The tool has been described in a paper released at the SATIN conference 
-<http://conferences.npl.co.uk/satin/>. See the paper at 
+The tool has been described in a paper released at the SATIN conference
+<http://conferences.npl.co.uk/satin/>. See the paper at
 <http://conferences.npl.co.uk/satin/papers/satin2011-Bortzmeyer.pdf>.
 
 
@@ -9,8 +9,9 @@ Basic instructions:
 
 1) sqlite3 dnssec.sqlite < create.sql
 
-2) Edit ~/.key-report.ini may be using key-report.ini.sample as a
-starting point.
+2) Edit ~/.key-report.ini; you can use key-report.ini.sample as a
+starting point. Set fileonly to a file which is appended to if
+you don't want to (or can't) send e-mail.
 
 3) while true:
    key-store-and-report.py $YOURDOMAIN $YOURSERVER
