@@ -14,6 +14,7 @@ import os
 import random
 import logging
 import logging.handlers
+from email.Utils import formatdate
 
 # Default values, some may be overriden by the configuration file
 edns_size = 4096
@@ -45,9 +46,9 @@ class NullHandler(logging.Handler):
 nullh = NullHandler()
 
 def sendemail(subject, content):
-    msg = ("From: %s\r\nTo: %s\r\nSubject: %s\r\nX-Mailer: %s\r\nMIME-Version: 1.0\r\nContent-type: text/plain; charset=\"UTF-8\"\r\n\r\n" % \
+    msg = ("From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\nX-Mailer: %s\r\nMIME-Version: 1.0\r\nContent-type: text/plain; charset=\"UTF-8\"\r\n\r\n" % \
            (maintainer_address, maintainer_address, ("[%s] " % email_prefix) + subject,
-            version))
+            formatdate(localtime=True), version))
     msg = msg + content + "\r\n"
     server = smtplib.SMTP(mail_server)
     server.set_debuglevel(0)
