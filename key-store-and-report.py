@@ -28,7 +28,7 @@ output = True
 syslog = False
 file_only = False
 SECTION = "default"
-version = sys.argv[0] + " $Revision: 10774 $ (Python %s)" % \
+version = sys.argv[0] + " (Python %s)" % \
           re.sub ("\n", " ", sys.version)
 # A sample configuration file:
 # [default]

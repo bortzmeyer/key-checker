@@ -35,11 +35,15 @@ for keyset_tuple in ecursor.fetchall():
             keys_ok = True
         key_tag = key_tuple[0]
         flags = key_tuple[1]
-        if flags & 0x1:
+        if flags & 1:
             ksk = "*"
         else:
             ksk = ""
-        key_tags.append("%i%s" % (key_tag, ksk))
+        if flags & 128:
+            revoked = "R"
+        else:
+            revoked = ""
+        key_tags.append("%i%s%s" % (key_tag, ksk, revoked))
     if keys_ok:
         print "#%i of %s: %s\t(first %sZ, last %sZ)" % (i, zone, key_tags, first, last)
 ecursor.close()
