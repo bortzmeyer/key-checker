@@ -5,11 +5,12 @@
 database_name = "dnssec.sqlite"
 
 import sys
+import string
 import sqlite3
 
 if len(sys.argv) != 2:
     raise Exception("Usage: keyset-zone.py zone")
-zone = sys.argv[1]
+zone = string.lower(sys.argv[1])
 if zone[-1] != '.':
     zone += '.'
 
