@@ -11,6 +11,7 @@ import hashlib
 import smtplib
 import ConfigParser
 import os
+import string
 import random
 import logging
 import logging.handlers
@@ -190,7 +191,7 @@ if syslog:
     default_log.addHandler(ch)
 if not output and not syslog:
     default_log.addHandler(nullh)
-zone = sys.argv[1]
+zone = string.lower(sys.argv[1])
 if zone[-1] != '.':
     zone += '.'
 address = sys.argv[2]
@@ -244,6 +245,15 @@ if tuple is None:
             cursor.execute("INSERT INTO Keysets_Members (id, member) VALUES (?, ?);", (dnskey_id, base64.b64encode(key.key)))
         infos = """
         The keyset %s appeared for the first time in the zone "%s".
+    
+        Its TTL is %i and its members are: %s
+        """ % (dnskey_id, zone, dnskey_ttl, key_tags)
+        sendemail("New keyset in zone %s" % zone, infos)
+    else:
+        # Keyset already exists, but for another zone
+        cursor.execute("INSERT INTO Keysets (id, first_seen, last_seen, name, ttl) VALUES (?, datetime('now'), datetime('now'), ?, ?);", (dnskey_id, zone, dnskey_ttl))
+        infos = """
+        The keyset %s appeared for the first time in the zone "%s" (but was already in another zone).
     
         Its TTL is %i and its members are: %s
         """ % (dnskey_id, zone, dnskey_ttl, key_tags)
