@@ -120,7 +120,7 @@ def get_rr(zone, rrtype, ns_address, handler=None):
                 else:
                     cursor.execute("UPDATE Signatures SET last_seen=datetime('now') WHERE signature=?;",
                                    (sig_value,))
-                cursor.execute("SELECT key FROM Keys_Signs WHERE key_tag=? AND zone=? AND what=? ORDER BY last_seen DESC LIMIT 1;", (thesig.key_tag, zone, rrtype))
+                cursor.execute("SELECT key_tag FROM Keys_Signs WHERE key_tag=? AND zone=? AND what=? ORDER BY last_seen DESC LIMIT 1;", (thesig.key_tag, zone, rrtype))
                 tuple = cursor.fetchone()
                 if tuple is None:
                     infos = """
