@@ -18,6 +18,8 @@ database = sqlite3.connect(database_name)
 ecursor = database.cursor()
 icursor = database.cursor()
 i = 0
+# TODO retrieve the data in table Key_flags and add a flag ! for revoked keys
+# TODO retrieve the data in table Key_signs and add a flag $ for keys signing the DNSKEY and & for keys signing the SOA
 ecursor.execute("SELECT id, first_seen, last_seen FROM Keysets WHERE name=?;", (zone,))
 for keyset_tuple in ecursor.fetchall():
     keyset_id = keyset_tuple[0]

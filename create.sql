@@ -12,7 +12,12 @@ CREATE TABLE Zones (first_seen INT, last_seen INT, name TEXT,
 				      -- time. A table with all the
 				      -- measures instead?
 
-CREATE TABLE Keys (first_seen INT, last_seen INT, name TEXT, key_tag INT, flags INT, algorithm INT, protocol INT, key TEXT);
+CREATE TABLE Keys (first_seen INT, last_seen INT, name TEXT, key_tag INT,
+   flags INT, -- Flags may change during the key's lifetime (for
+	      -- instance the REVOKE bit). These are only the
+	      -- first-seen flags, never changed after. See the
+	      -- Keys_Flags table for current flags.
+   algorithm INT, protocol INT, key TEXT);
 
 -- Each DNSKEY RRset is made of several lines of table Keysets, one
 -- for each member key. All the lines of a given DNSKEY RRset has the
@@ -22,6 +27,11 @@ CREATE TABLE Keysets (id TEXT NOT NULL, first_seen INT, last_seen INT, name TEXT
 -- "id" is the SHA-1 hash (base64-encoded) of all the keys of the set.
 CREATE TABLE Keysets_members (id TEXT, member TEXT);
 -- "member" refers to a "key" in table Keys
+
+CREATE TABLE Keys_Flags (key TEXT, zone TEXT, flags INT, seen INT);
+-- TODO: it's not ideal to index by key tag, they may be reused
+CREATE TABLE Keys_Signs (key_tag INT, zone TEXT, what TEXT,
+       first_seen INT, last_seen INT); -- "what" is the RR type, SOA, DNSKEY, etc
 
 -- Good readings, for the "time" columns:
 -- http://www.sqlite.org/datatype3.html and

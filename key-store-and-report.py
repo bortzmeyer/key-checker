@@ -120,6 +120,16 @@ def get_rr(zone, rrtype, ns_address, handler=None):
                 else:
                     cursor.execute("UPDATE Signatures SET last_seen=datetime('now') WHERE signature=?;",
                                    (sig_value,))
+                cursor.execute("SELECT key FROM Keys_Signs WHERE key_tag=? AND zone=? AND what=? ORDER BY last_seen DESC LIMIT 1;", (thesig.key_tag, zone, rrtype))
+                tuple = cursor.fetchone()
+                if tuple is None:
+                    infos = """
+The key %s in the zone "%s" has new signing activities: %s
+                    """ % (thesig.key_tag, zone, rrtype)
+                    sendemail("New signatures in zone \"%s\"" % (zone, ), infos);
+                    cursor.execute("INSERT INTO Keys_Signs (key_tag, zone, what, first_seen, last_seen) VALUES (?, ?, ?, datetime('now'), datetime('now'));", (thesig.key_tag, zone, rrtype))
+                else:
+                    cursor.execute("UPDATE Keys_Signs SET last_seen=datetime('now') WHERE key_tag=? AND zone=? AND what=?", (thesig.key_tag, zone, rrtype))
     if not record_found:
         default_log.error("No %s at %s" % (rrtype, zone))
         sys.exit(1)
@@ -218,6 +228,7 @@ for key in keys:
     hasher.update(key.key)
     key_tags.append(key_tag)
     key_value = base64.b64encode(key.key)
+    dnskey_id = base64.b64encode(hasher.digest())
     # The AND name is here in case several zones use the same key
     cursor.execute("SELECT key_tag FROM Keys WHERE key=? AND name=?;", (key_value, zone))
     tuple = cursor.fetchone()
@@ -231,7 +242,14 @@ for key in keys:
         sendemail("New key %s in zone %s" % (key_tag, zone), infos)
     else:
         cursor.execute("UPDATE Keys SET last_seen=datetime('now') WHERE key=? AND name=?;", (key_value, zone))
-dnskey_id = base64.b64encode(hasher.digest())
+    cursor.execute("SELECT flags FROM Keys_Flags WHERE key=? AND zone=? ORDER BY seen DESC LIMIT 1;", (key_value, zone))
+    tuple = cursor.fetchone()
+    if tuple is None or tuple[0] != key.flags:
+        infos = """
+        The key %s in the zone "%s" has new flags: %s
+        """ % (key_tag, zone, key.flags)
+        sendemail("New flags %s in zone \"%s\"" % (key.flags, zone), infos);
+        cursor.execute("INSERT INTO Keys_Flags (key, zone, flags, seen) VALUES (?, ?, ?, datetime('now'));", (key_value, zone, key.flags))
 cursor.execute("SELECT id, first_seen, last_seen FROM Keysets WHERE id=? AND name=?;",
                (dnskey_id, zone))
 tuple = cursor.fetchone()
