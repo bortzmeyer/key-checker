@@ -74,7 +74,7 @@ def sendemail(subject, content):
 def get_rr(zone, rrtype, ns_address, handler=None):
     """ rrtype must be a character _string_. handler is a function
     which will be called for each rrset (and receives it as a
-    parameter). See display_target for an example of handker (it is
+    parameter). See display_target for an example of handler (it is
     suitable for a NS rrtype)."""
     mytype = dns.rdatatype.from_text(rrtype)
     query = dns.message.make_query(zone, rrtype)
@@ -136,7 +136,7 @@ The key %s in the zone "%s" has new signing activities: %s
     database.commit()
 
 def display_target(set):
-    """ Example of a simple handker for get_rr. """
+    """ Example of a simple handler for get_rr. """
     for record in set:
         print record.target
 
@@ -205,7 +205,7 @@ zone = string.lower(sys.argv[1])
 if zone[-1] != '.':
     zone += '.'
 address = sys.argv[2]
-# TODO: accept as parameter an artificial time, to be used instead of
+# TODO: accept an artificial time as parameter, to be used instead of
 # the real clock, to test "what if" scenarios?
 default_log.info("Starting %s (%s)..." % (zone, address))
 error = None
