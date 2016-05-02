@@ -26,6 +26,8 @@ If you want to monitor several domains, an example script is:
 
 #!/bin/sh
 
+# $RANDOM is actually a bash extension so may be I should use /bin/bash
+
 # Remember to add a dot at the end, specially for TLD which match a
 # type or class name (Mexico, Madagascar...)
 for domain in example.com example.net example.org ; do
