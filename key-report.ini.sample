@@ -1,6 +1,0 @@
-[default]
-mailserver: smtp.example.net
-prefix: DNSSEC Check of my zones
-maintainer: John.Foo@bar.example
-output: false
-fileonly: /path/to/file
